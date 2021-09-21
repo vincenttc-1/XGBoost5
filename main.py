@@ -10,6 +10,10 @@ Original file is located at
 import pandas as pd
 from flask import Flask,jsonify,request
 from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.feature_extraction.text import CountVectorizer
+from sklearn.metrics import accuracy_score
+from sklearn.metrics import confusion_matrix
+from sklearn.metrics import classification_report
 import xgboost
 import pickle
 from flask_cors import CORS
@@ -18,6 +22,8 @@ from Sastrawi.Stemmer.StemmerFactory import StemmerFactory
 from Sastrawi.StopWordRemover.StopWordRemoverFactory import StopWordRemoverFactory, StopWordRemover, ArrayDictionary
 import re
 import string
+from flask_cors import CORS
+from flask import Flask,jsonify,request,render_template
 
 #nltk.download('punkt')
 
@@ -38,8 +44,6 @@ def text_preproc(x):
 df2['Judul Berita (Bersih)'] = df2['title'].apply(text_preproc)
 df.head()
 
-from sklearn.feature_extraction.text import TfidfVectorizer
-from sklearn.feature_extraction.text import CountVectorizer
 vectorizer = TfidfVectorizer(binary=True)
 #X_train_vec = vectorizer.fit_transform(X_train).toarray()
 #X_test_vec = vectorizer.fit_transform(X_test).toarray()
@@ -61,17 +65,10 @@ vectorizer.fit(kosaKata)
 
 transform = vectorizer.transform(df2['Judul Berita (Bersih)']).toarray()
 
-from sklearn.metrics import accuracy_score
-from sklearn.metrics import confusion_matrix
-from sklearn.metrics import classification_report
-
 # make predictions for test data
 predict = xgb_model_loaded.predict(transform)
 predictions = [round(value) for value in predict]
 print(predict)
-
-from flask_cors import CORS
-from flask import Flask,jsonify,request,render_template
 
 app = Flask(__name__)
 CORS(app)
